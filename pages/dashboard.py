@@ -2,6 +2,8 @@ import streamlit as st
 
 from database import get_connection
 
+from utils.ui import load_css
+
 from agents.freshness_agent import (
     get_remaining_days,
     get_status,
@@ -14,7 +16,18 @@ from agents.waste_agent import (
     get_expiring_items
 )
 
-st.title("🏠 Dashboard")
+load_css()
+
+st.markdown("""
+<div class="card">
+    <h1>🥬 FreshTrack AI</h1>
+    <p style="font-size:18px;color:gray;">
+        Smart Kitchen Inventory & Food Waste Reduction
+    </p>
+</div>
+""", unsafe_allow_html=True)
+
+st.caption("Monitor your kitchen at a glance.")
 
 conn = get_connection()
 c = conn.cursor()
@@ -24,88 +37,116 @@ items = c.fetchall()
 
 conn.close()
 
-# Kitchen Health Score
 score = calculate_health(items)
 
-st.subheader("🥗 Kitchen Health Score")
-
-st.metric(
-    "Health Score",
-    f"{score}/100"
-)
-
-st.progress(score / 100)
-
-# Waste Prevention Data
 expired = get_expired_items(items)
 use_today = get_use_today_items(items)
 expiring = get_expiring_items(items)
 
-# Use Today Section
+# ==========================
+# Dashboard Summary Cards
+# ==========================
+
+col1, col2, col3, col4 = st.columns(4)
+
+with col1:
+    st.metric(
+        "📦 Items",
+        len(items)
+    )
+
+with col2:
+    st.metric(
+        "🥗 Health",
+        f"{score}%"
+    )
+
+with col3:
+    st.metric(
+        "⚠ Expiring",
+        len(expiring)
+    )
+
+with col4:
+    st.metric(
+        "🔴 Expired",
+        len(expired)
+    )
+
+st.progress(score / 100)
+
+st.divider()
+
+# ==========================
+# Use Today
+# ==========================
+
 st.subheader("🚨 Use Today")
 
 if len(use_today) == 0:
-    st.success("No urgent items.")
+    st.success("Nothing needs immediate attention today.")
 
 else:
     for item in use_today:
         st.warning(
-            f"{item[1]} should be used today."
+            f"🍽️ {item[1]} should be used today."
         )
 
-# Waste Alerts
-st.subheader("🗑 Waste Alerts")
+st.divider()
 
-if len(expired) == 0:
-    st.success("No expired items.")
-
-else:
-    for item in expired:
-        st.error(
-            f"{item[1]} has expired."
-        )
-
+# ==========================
 # Expiring Soon
+# ==========================
+
 st.subheader("⚠ Expiring Soon")
 
-found = False
+if len(expiring) == 0:
+    st.success("No items are expiring soon.")
 
-for item in items:
+else:
 
-    item_name = item[1]
-    purchase_date = item[4]
+    for item in expiring:
 
-    remaining = get_remaining_days(
-        item_name,
-        purchase_date
-    )
+        remaining = get_remaining_days(
+            item[1],
+            item[4]
+        )
 
-    status = get_status(
-        remaining
-    )
+        st.warning(
+            f"🥬 {item[1]} • {remaining} day(s) left"
+        )
 
-    if status != "Fresh":
+st.divider()
 
-        found = True
+# ==========================
+# Expired Items
+# ==========================
 
-        if remaining <= 0:
-            st.error(
-                f"{item_name} has expired."
-            )
+st.subheader("🗑️ Waste Alerts")
 
-        else:
-            st.warning(
-                f"{item_name} : {remaining} day(s) left"
-            )
+if len(expired) == 0:
+    st.success("Great! No expired produce.")
 
-if not found:
-    st.success(
-        "All produce is fresh!"
-    )
+else:
 
+    for item in expired:
+
+        st.error(
+            f"❌ {item[1]} has expired."
+        )
+
+st.divider()
+
+# ==========================
 # Inventory Summary
+# ==========================
+
 st.subheader("📦 Inventory Summary")
 
-st.info(
-    f"{len(items)} items currently tracked."
-)
+left, right = st.columns(2)
+
+with left:
+    st.info(f"Total Items: **{len(items)}**")
+
+with right:
+    st.info(f"Kitchen Health Score: **{score}/100**")

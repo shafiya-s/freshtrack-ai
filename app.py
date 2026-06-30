@@ -1,34 +1,28 @@
 import streamlit as st
 
-st.set_page_config(page_title="FreshTrack AI", layout="wide")
+st.set_page_config(
+    page_title="FreshTrack AI",
+    page_icon="🥬",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
 
 st.title("🥬 FreshTrack AI")
-st.write("Reduce Food Waste. Eat Smarter.")
+st.subheader("Smart Kitchen Inventory & Food Waste Reduction")
 
-st.sidebar.title("Navigation")
-page = st.sidebar.radio("Go to", [
-    "Dashboard",
-    "Add Item",
-    "Inventory",
-    "Ask FreshTrack",
-    "Shopping",
-    "Kitchen Health"
-])
+st.markdown("---")
 
-if page == "Dashboard":
-    st.write("📊 Dashboard Coming Soon")
+st.markdown("""
+### 👈 Use the sidebar to navigate
 
-elif page == "Add Item":
-    st.write("➕ Add Item Page Coming Soon")
+FreshTrack AI helps you:
 
-elif page == "Inventory":
-    st.write("📦 Inventory Coming Soon")
+- 📦 Manage fresh produce inventory
+- 🥗 Track freshness automatically
+- 🚨 Prevent food waste
+- 🍽️ Get recipe suggestions
+- 🛒 Receive shopping recommendations
+- 📊 Monitor Kitchen Health Score
 
-elif page == "Ask FreshTrack":
-    st.write("🤖 AI Chat Coming Soon")
-
-elif page == "Shopping":
-    st.write("🛒 Shopping Coming Soon")
-
-elif page == "Kitchen Health":
-    st.write("📊 Kitchen Health Coming Soon")
+Select any page from the sidebar to begin.
+""")
